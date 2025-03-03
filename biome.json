@@ -1,0 +1,24 @@
+{
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": ["node_modules", ".next", "out", "build", ".vercel"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "useSortedClasses": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}
