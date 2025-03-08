@@ -6,7 +6,7 @@ import { useState } from 'react';
 type ActionValue = 'approve' | 'reject';
 
 export function ActionButtons() {
-  const [value, setValue] = useState<ActionValue>();
+  const [value, setValue] = useState<ActionValue>('approve');
   return (
     <>
       <input type="hidden" name="action" value={value} />
