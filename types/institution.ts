@@ -1,7 +1,7 @@
 export type GetPendingApprovalInstitution = {
   id: number;
   name: string;
-  created_at: string;
+  createdAt: string;
   status: string;
   cnpj: string;
 };
