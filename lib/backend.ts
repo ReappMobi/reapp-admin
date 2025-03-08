@@ -1,6 +1,26 @@
-import type { GetPendingApprovalInstitution } from '@/types/institution';
+import type {
+  GetInstitution,
+  GetPendingApprovalInstitution,
+} from '@/types/institution';
 
 const backendUrl = process.env.API_URL || 'http://localhost:3000';
+
+async function getInstitutions(token: string): Promise<GetInstitution[]> {
+  try {
+    const response = await fetch(`${backendUrl}/account/institution`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const institutions = await response.json();
+    return institutions;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
 
 async function getPendingInstitutions(
   token: string,
@@ -40,4 +60,5 @@ export default {
   getPendingInstitutions,
   approveInstitution,
   rejectInstitution,
+  getInstitutions,
 };
