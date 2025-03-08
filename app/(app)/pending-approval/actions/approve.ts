@@ -1,19 +1,20 @@
 'use server';
 
 import backend from '@/lib/backend';
+import type { GetPendingApprovalInstitution } from '@/types/institution';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { act } from 'react';
 
-export async function loadInstitutions() {
+export async function loadInstitutions(): Promise<
+  GetPendingApprovalInstitution[] | undefined
+> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value || '';
-  const res = await backend.getPendingInstitutions(token);
-  const institutions = await res.json();
+  const institutions = await backend.getPendingInstitutions(token);
   return institutions;
 }
 
-export async function approveInstitution(formData: FormData) {
+export async function approveInstitution(formData: FormData): Promise<void> {
   const id = formData.get('id') as string;
   const action = formData.get('action') as string;
 
