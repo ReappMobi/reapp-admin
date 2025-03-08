@@ -27,5 +27,5 @@ export async function approveInstitution(formData: FormData): Promise<void> {
     await backend.rejectInstitution(token, +id);
   }
 
-  redirect('/pending');
+  redirect('/pending-approval');
 }
