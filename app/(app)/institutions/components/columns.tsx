@@ -53,8 +53,7 @@ export const columns: ColumnDef<Account & InstitutionAccount>[] = [
   },
   {
     id: 'actions',
-    accessorFn: () => null,
-    accessorKey: 'id',
+    header: 'Ações',
     enableHiding: false,
     cell: ({ row }) => {
       const [action, setAction] = useState('');
