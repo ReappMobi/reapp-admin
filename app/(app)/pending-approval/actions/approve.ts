@@ -1,30 +1,18 @@
 'use server';
 
-import backend from '@/lib/backend';
-import type { GetPendingApprovalInstitution } from '@/types/institution';
-import { cookies } from 'next/headers';
+import { updateAccountStatus } from '@/lib/backend';
+import { AccountStatus } from '@/types/account';
 import { redirect } from 'next/navigation';
 
-export async function loadInstitutions(): Promise<
-  GetPendingApprovalInstitution[] | undefined
-> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value || '';
-  const institutions = await backend.getPendingInstitutions(token);
-  return institutions;
-}
-
-export async function approveInstitution(formData: FormData): Promise<void> {
+export async function handleInstitutionApproval(
+  formData: FormData,
+): Promise<void> {
   const id = formData.get('id') as string;
   const action = formData.get('action') as string;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value || '';
-
   if (action === 'approve') {
-    await backend.approveInstitution(token, +id);
+    await updateAccountStatus(+id, AccountStatus.ACTIVE);
   } else if (action === 'reject') {
-    await backend.rejectInstitution(token, +id);
+    await updateAccountStatus(+id, AccountStatus.SUSPENDED);
   }
 
   redirect('/pending-approval');

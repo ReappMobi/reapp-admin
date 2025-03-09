@@ -23,13 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getInstitutions, getPendingInstitutions } from '@/lib/backend';
+import { AccountStatus } from '@/types/account';
 import { MoreHorizontal } from 'lucide-react';
 import Form from 'next/form';
-import { approveInstitution, loadInstitutions } from './actions/approve';
+import { handleInstitutionApproval } from './actions/approve';
 import { ActionButtons } from './components/action-buttons';
 
 export default async function Page() {
-  const institutions = (await loadInstitutions()) || [];
+  const institutions = await getPendingInstitutions();
 
   return (
     <div className="container mx-auto max-w-screen-md p-10">
@@ -73,9 +75,9 @@ export default async function Page() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {institution.status === 'PENDING'
+                        {institution.status === AccountStatus.PENDING
                           ? 'Pendente'
-                          : institution.status === 'APPROVED'
+                          : institution.status === AccountStatus.ACTIVE
                             ? 'Aprovado'
                             : 'Recusado'}
                       </Badge>
@@ -98,7 +100,7 @@ export default async function Page() {
                           <DropdownMenuSeparator />
                           <Form
                             className="flex flex-col gap-2"
-                            action={approveInstitution}
+                            action={handleInstitutionApproval}
                             formMethod="POST"
                           >
                             <input

@@ -1,16 +1,10 @@
 'use server';
-import {
-  AccountStatus,
-  AccountType,
-  type InstitutionAccount,
-} from '@/types/account';
-import type { GetPendingApprovalInstitution } from '@/types/institution';
-
+import { type Account, AccountStatus, AccountType } from '@/types/account';
 import { cookies } from 'next/headers';
 
 const backendUrl = process.env.API_URL || 'http://localhost:3000';
 
-export async function getInstitutions(): Promise<InstitutionAccount[]> {
+export async function getInstitutions(): Promise<Account[]> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value || '';
 
@@ -35,12 +29,10 @@ export async function getInstitutions(): Promise<InstitutionAccount[]> {
 
 export async function updateAccountStatus(
   id: number,
-  action: string,
+  status: AccountStatus,
 ): Promise<void> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value || '';
-  const status =
-    action === 'suspend' ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE;
 
   await fetch(`${backendUrl}/account/${id}`, {
     method: 'PUT',
@@ -54,42 +46,24 @@ export async function updateAccountStatus(
   });
 }
 
-export async function getPendingInstitutions(
-  token: string,
-): Promise<GetPendingApprovalInstitution[] | undefined> {
-  const response = await fetch(`${backendUrl}/account/institutions/pending`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const institutions = await response.json();
-  return institutions;
-}
+export async function getPendingInstitutions(): Promise<Account[]> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value || '';
 
-export async function approveInstitution(
-  token: string,
-  id: number,
-): Promise<void> {
-  await fetch(`${backendUrl}/account/institution/approve/${id}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
-
-export async function rejectInstitution(
-  token: string,
-  id: number,
-): Promise<void> {
-  await fetch(`${backendUrl}/account/institution/reject/${id}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const response = await fetch(
+      `${backendUrl}/account?type=${AccountType.INSTITUTION}&status=${AccountStatus.PENDING}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const institutions = await response.json();
+    return institutions;
+  } catch {
+    return [];
+  }
 }

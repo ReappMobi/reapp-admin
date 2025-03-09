@@ -1,6 +1,7 @@
 'use server';
 
 import { updateAccountStatus } from '@/lib/backend';
+import { AccountStatus } from '@/types/account';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const action = formData.get('action');
+  const action = formData.get('action') as string;
   if (!action) {
     return Response.redirect(
       new URL('/institutions?error=missing-action', request.url),
@@ -22,7 +23,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await updateAccountStatus(+institutionId, action.toString());
+  const newStatus =
+    action === 'suspend' ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE;
+
+  await updateAccountStatus(+institutionId, newStatus);
 
   return Response.redirect(new URL('/institutions', request.url), 303);
 }
