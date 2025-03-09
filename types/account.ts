@@ -24,21 +24,19 @@ export type Account = {
   followingCount: number;
   followersCount: number;
   status: AccountStatus;
-  institution: null;
-  donor: null;
+  institution: Institution | null;
+  donor: Donor | null;
   media: string | null;
 };
 
-export type DonorAccount = Account & {
-  accountType: AccountType.DONOR;
+export type Donor = {
   donor: {
     id: number;
     accountId: number;
   };
 };
 
-export type InstitutionAccount = Account & {
-  accountType: AccountType.INSTITUTION;
+export type Institution = {
   institution: {
     id: number;
     cnpj: string;
