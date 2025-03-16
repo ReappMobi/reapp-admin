@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const action = formData.get('action') as string;
+  const action = formData.get('action') as AccountStatus;
   if (!action) {
     return Response.redirect(
       new URL('/institutions?error=missing-action', request.url),
@@ -23,10 +23,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const newStatus =
-    action === 'suspend' ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE;
+  if (!Object.values(AccountStatus).includes(action as AccountStatus)) {
+    return Response.redirect(
+      new URL('/institutions?error=invalid-action', request.url),
+      303,
+    );
+  }
 
-  await updateAccountStatus(+institutionId, newStatus);
+  await updateAccountStatus(+institutionId, action);
 
   return Response.redirect(new URL('/institutions', request.url), 303);
 }
