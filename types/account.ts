@@ -37,15 +37,13 @@ export type Donor = {
 };
 
 export type Institution = {
-  institution: {
+  id: number;
+  cnpj: string;
+  phone: string;
+  accountId: number;
+  categoryId: number;
+  category: {
     id: number;
-    cnpj: string;
-    phone: string;
-    accountId: number;
-    categoryId: number;
-    category: {
-      id: number;
-      name: string;
-    };
+    name: string;
   };
 };
