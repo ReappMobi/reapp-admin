@@ -4,6 +4,32 @@ import { cookies } from 'next/headers';
 
 const backendUrl = process.env.API_URL || 'http://localhost:3000';
 
+export async function login(email: string, password: string): Promise<boolean> {
+  const response = await fetch(`${backendUrl}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    const cookieStore = await cookies();
+
+    const user = {
+      name: data.user.name,
+      email: data.user.email,
+    };
+
+    cookieStore.set('token', data.token);
+    cookieStore.set('user', JSON.stringify(user));
+    return true;
+  }
+
+  return false;
+}
+
 export async function getInstitutions(): Promise<Account[]> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value || '';
@@ -12,6 +38,7 @@ export async function getInstitutions(): Promise<Account[]> {
     const response = await fetch(
       `${backendUrl}/account?type=${AccountType.INSTITUTION}`,
       {
+        cache: 'default',
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
