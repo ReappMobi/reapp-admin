@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { logout } from '../../actions';
 
 type HeaderProps = {
   name?: string;
@@ -33,7 +34,7 @@ export function AvatarOptions({ name, image }: HeaderProps): React.ReactNode {
       <DropdownMenuContent>
         <DropdownMenuLabel>{name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+        <DropdownMenuItem className="cursor-pointer" onClick={logout}>
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>
