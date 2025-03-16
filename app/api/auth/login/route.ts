@@ -25,7 +25,16 @@ export async function POST(request: Request) {
   const data_json = await data.json();
   if (data.ok) {
     const cookieStore = await cookies();
+
+    const user = {
+      name: data_json.user.name,
+      email: data_json.user.email,
+      image: data_json.user.image,
+    };
+
     cookieStore.set('token', data_json.token);
+    cookieStore.set('user', JSON.stringify(user));
+
     return Response.json({}, { status: 200 });
   }
 
