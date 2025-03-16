@@ -1,48 +1,51 @@
-import { jwtVerify } from 'jose';
+import { decodeJwt } from 'jose';
 import { type NextRequest, NextResponse } from 'next/server';
+const publicRoutes = [
+  {
+    path: '/sign-in',
+    whenUnauthenticated: 'redirect',
+  },
+] as const;
+const REDIRECT_WHEN_UNAUTHENTICATED = '/sign-in';
 
 export async function middleware(request: NextRequest) {
-  const url = request.nextUrl.clone();
+  const path = request.nextUrl.pathname;
+  const publicRoute = publicRoutes.find((route) => path.startsWith(route.path));
   const token = request.cookies.get('token')?.value;
 
-  if (url.pathname === '/auth/logout') {
-    const response = NextResponse.redirect(new URL('/auth/login', url));
-    response.cookies.delete('token');
-    return response;
-  }
-
-  const isProtectedRoute = ['/', '/auth/logout'].includes(url.pathname);
-  const isLoginRoute = url.pathname === '/auth/login';
-
-  if (!token) {
-    if (isProtectedRoute) {
-      return NextResponse.redirect(new URL('/auth/login', url));
-    }
+  if (!token && publicRoute) {
     return NextResponse.next();
   }
 
-  try {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.JWT_SECRET),
-    );
-
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      throw new Error('Token expired');
-    }
-  } catch (error) {
-    const response = NextResponse.redirect(new URL('/auth/login', url));
-    response.cookies.delete('token');
-    return response;
+  if (!token && !publicRoute) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = REDIRECT_WHEN_UNAUTHENTICATED;
+    return NextResponse.redirect(redirectUrl);
   }
 
-  if (isLoginRoute) {
-    return NextResponse.redirect(new URL('/', url));
+  if (token && publicRoute && publicRoute.whenUnauthenticated === 'redirect') {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = '/';
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (token && !publicRoute) {
+    const data = decodeJwt(token);
+
+    if (data.exp && data.exp < Date.now() / 1000) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = REDIRECT_WHEN_UNAUTHENTICATED;
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    NextResponse.next().cookies.set('user', JSON.stringify(data.user));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/', '/auth/logout', '/auth/login'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+  ],
 };
