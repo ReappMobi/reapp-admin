@@ -34,10 +34,10 @@ export default async function Page() {
   const institutions = await getPendingInstitutions();
 
   return (
-    <div className="container mx-auto max-w-screen-md p-10">
+    <div className="container mx-auto h-full max-w-screen-lg">
       <Card
         x-chunk="dashboard-06-chunk-0"
-        className="w-full flex-1 md:max-w-screen-lg"
+        className="h-full w-full flex-1 border-0 shadow-none"
       >
         <CardHeader>
           <CardTitle className="text-2xl">Aprovações</CardTitle>
@@ -47,7 +47,7 @@ export default async function Page() {
         </CardHeader>
         <CardContent>
           {(institutions.length === 0 && (
-            <p className="py-4 text-center text-sm">
+            <p className="py-32 text-center text-sm">
               Nenhuma instituição para aprovar.
             </p>
           )) || (
@@ -55,6 +55,8 @@ export default async function Page() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead>Email</TableHead>
                   <TableHead className="hidden md:table-cell">
                     Criado em
                   </TableHead>
@@ -65,19 +67,21 @@ export default async function Page() {
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-200">
-                {institutions.map((institution) => (
-                  <TableRow key={institution.id}>
+                {institutions.map((account) => (
+                  <TableRow key={account.id}>
                     <TableCell className="font-medium">
-                      {institution.name}
+                      {account.name}
                     </TableCell>
+                    <TableCell>{account.institution?.cnpj}</TableCell>
+                    <TableCell>{account.email}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {new Date(institution.createdAt).toLocaleDateString()}
+                      {new Date(account.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {institution.status === AccountStatus.PENDING
+                        {account.status === AccountStatus.PENDING
                           ? 'Pendente'
-                          : institution.status === AccountStatus.ACTIVE
+                          : account.status === AccountStatus.ACTIVE
                             ? 'Aprovado'
                             : 'Recusado'}
                       </Badge>
@@ -103,11 +107,7 @@ export default async function Page() {
                             action={handleInstitutionApproval}
                             formMethod="POST"
                           >
-                            <input
-                              type="hidden"
-                              name="id"
-                              value={institution.id}
-                            />
+                            <input type="hidden" name="id" value={account.id} />
                             <ActionButtons />
                           </Form>
                         </DropdownMenuContent>
