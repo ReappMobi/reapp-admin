@@ -1,5 +1,7 @@
 'use client';
 
+import { updateAccountStatus } from '@/app/actions';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,7 +14,6 @@ import {
 import { type Account, AccountStatus } from '@/types/account';
 import type { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
 
 const statusMap = {
   [AccountStatus.ACTIVE]: 'Ativo',
@@ -57,7 +58,11 @@ export const columns: ColumnDef<Account>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as AccountStatus;
-      return <div className="text-xs capitalize">{statusMap[status]}</div>;
+      return (
+        <Badge variant={'outline'} className="text-xs capitalize">
+          {statusMap[status]}
+        </Badge>
+      );
     },
   },
   {
@@ -65,7 +70,7 @@ export const columns: ColumnDef<Account>[] = [
     header: 'Ações',
     enableHiding: false,
     cell: ({ row }) => {
-      const [action, setAction] = useState<AccountStatus>(AccountStatus.ACTIVE);
+      const id = row.getValue('id') as number;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -75,40 +80,55 @@ export const columns: ColumnDef<Account>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <form action="institutions/mute" method="POST">
-              <input
-                type="hidden"
-                name="institutionId"
-                value={row.getValue('id') as string}
-              />
-              <input type="hidden" name="action" value={action} />
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="w-full cursor-pointer" asChild>
-                <button
-                  type="submit"
-                  onClick={() => setAction(AccountStatus.SUSPENDED)}
-                >
-                  Suspender instituição
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="w-full cursor-pointer" asChild>
-                <button
-                  type="submit"
-                  onClick={() => setAction(AccountStatus.BANNED)}
-                >
-                  Banir instituição
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="w-full cursor-pointer" asChild>
-                <button
-                  type="submit"
-                  onClick={() => setAction(AccountStatus.PENDING)}
-                >
-                  Revisar aprovação
-                </button>
-              </DropdownMenuItem>
-            </form>
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="w-full cursor-pointer text-left"
+              asChild
+            >
+              <Button
+                variant={'ghost'}
+                onClick={() =>
+                  updateAccountStatus(
+                    id,
+                    AccountStatus.SUSPENDED,
+                    '/institutions',
+                  )
+                }
+              >
+                Suspender instituição
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="w-full cursor-pointer text-left"
+              asChild
+            >
+              <Button
+                variant={'ghost'}
+                onClick={() =>
+                  updateAccountStatus(id, AccountStatus.BANNED, '/institutions')
+                }
+              >
+                Banir instituição
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="w-full cursor-pointer text-left"
+              asChild
+            >
+              <Button
+                variant={'ghost'}
+                onClick={() =>
+                  updateAccountStatus(
+                    id,
+                    AccountStatus.PENDING,
+                    '/institutions',
+                  )
+                }
+              >
+                Revogar aprovação
+              </Button>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
